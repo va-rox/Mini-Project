@@ -1,4 +1,5 @@
-VI Semester Mini-Project
+## VI Semester Mini-Project
+
 ## Team
 
 - **G Vaasudeva** (U03NM21T04321)
