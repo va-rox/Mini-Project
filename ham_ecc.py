@@ -68,12 +68,151 @@ ber_noCoding /= N
 ber_7sdd /= N
 ber_7hdd /= N
 
-plt.figure(1)
+# plt.figure(1)
+# plt.semilogy(EbN0dB, ber_noCoding, "b--", label="No coding")
+# plt.semilogy(EbN0dB, ber_7sdd, "r-s", label="Hamming7-SDD")
+# plt.semilogy(EbN0dB, ber_7hdd, "k-s", label="Hamming7-HDD")
+# plt.grid(True)
+# plt.title("BER for no coding and (7,4) Hamming Code")
+# plt.ylabel("BER")
+# plt.xlabel("Eb/N0(dB)")
+# plt.legend()
+# plt.axis([min(EbN0dB), max(EbN0dB), 1e-4, 1])
+# plt.show()
+
+# Repetition Code Parameters
+n2, k2 = 3, 1  # Repetition (3,1)
+
+# Create repetition coded messages
+msg1 = (np.sign(np.random.randn(N, k2)) + 1) / 2
+msg1_m = msg1.copy()  # modulated messages
+msg1_m[msg1_m == 0] = -1  # BPSK Mapping
+
+coded_w3 = np.repeat(msg1, n2, axis=1)
+coded_w3[coded_w3 == 0] = -1  # modulation one bit per symbol
+
+# BER vector for repetition code
+ber_3hdd = np.zeros(len(EbN0))
+
+for i in range(len(EbN0)):
+    yIII = (np.sqrt(EbN0[i]) * coded_w3) + np.random.randn(N, n2)  # channel out signal with AWGN (Nxn2) matrix
+    for j in range(N):
+        # Repetition (3,1)
+        # Hard Decision Decoding
+        yIII_hd = yIII[j, :]
+        yIII_hd[yIII_hd > 0] = 1
+        yIII_hd[yIII_hd <= 0] = 0
+        decoded_w3 = np.round(np.sum(yIII_hd) / n2).astype(int)
+        cw3 = coded_w3[j, :]
+        cw3[cw3 == -1] = 0  # revert modulation
+        ber_3hdd[i] += np.sum(decoded_w3 != cw3[0]) / n2
+
+# Final average BER for repetition code
+ber_3hdd /= N
+
+# plt.figure(2)
+# plt.semilogy(EbN0dB, ber_noCoding, "b--", label="No coding")
+# plt.semilogy(EbN0dB, ber_7sdd, "r-s", label="Hamming7-SDD")
+# plt.semilogy(EbN0dB, ber_7hdd, "k-s", label="Hamming7-HDD")
+# plt.semilogy(EbN0dB, ber_3hdd, "g-o", label="Repetition3-HDD")
+# plt.grid(True)
+# plt.title("BER for no coding, (7,4) Hamming Code, and (3,1) Repetition Code")
+# plt.ylabel("BER")
+# plt.xlabel("Eb/N0(dB)")
+# plt.legend()
+# plt.axis([min(EbN0dB), max(EbN0dB), 1e-4, 1])
+# plt.show()
+
+# Repetition Code Parameters for (5,1)
+n3, k3 = 5, 1  # Repetition (5,1)
+
+# Create repetition coded messages
+msg5 = (np.sign(np.random.randn(N, k3)) + 1) / 2
+msg5_m = msg5.copy()  # modulated messages
+msg5_m[msg5_m == 0] = -1  # BPSK Mapping
+
+coded_w5 = np.repeat(msg5, n3, axis=1)
+coded_w5[coded_w5 == 0] = -1  # modulation one bit per symbol
+
+# BER vector for repetition code (5,1)
+ber_5hdd = np.zeros(len(EbN0))
+
+for i in range(len(EbN0)):
+    yIV = (np.sqrt(EbN0[i]) * coded_w5) + np.random.randn(N, n3)  # channel out signal with AWGN (Nxn3) matrix
+    for j in range(N):
+        # Repetition (5,1)
+        # Hard Decision Decoding
+        yIV_hd = yIV[j, :]
+        yIV_hd[yIV_hd > 0] = 1
+        yIV_hd[yIV_hd <= 0] = 0
+        decoded_w5 = np.round(np.sum(yIV_hd) / n3).astype(int)
+        cw5 = coded_w5[j, :]
+        cw5[cw5 == -1] = 0  # revert modulation
+        ber_5hdd[i] += np.sum(decoded_w5 != cw5[0]) / n3
+
+# Final average BER for repetition code (5,1)
+ber_5hdd /= N
+
+# plt.figure(3)
+# plt.semilogy(EbN0dB, ber_noCoding, "b--", label="No coding")
+# plt.semilogy(EbN0dB, ber_7sdd, "r-s", label="Hamming7-SDD")
+# plt.semilogy(EbN0dB, ber_7hdd, "k-s", label="Hamming7-HDD")
+# plt.semilogy(EbN0dB, ber_3hdd, "g-o", label="Repetition3-HDD")
+# plt.semilogy(EbN0dB, ber_5hdd, "m-^", label="Repetition5-HDD")
+# plt.grid(True)
+# plt.title("BER for no coding, (7,4) Hamming Code, (3,1) and (5,1) Repetition Codes")
+# plt.ylabel("BER")
+# plt.xlabel("Eb/N0(dB)")
+# plt.legend()
+# plt.axis([min(EbN0dB), max(EbN0dB), 1e-4, 1])
+# plt.show()
+
+# BER vector for repetition code (3,1) with Soft Decision Decoding
+ber_3sdd = np.zeros(len(EbN0))
+
+for i in range(len(EbN0)):
+    yIII = (np.sqrt(EbN0[i]) * coded_w3) + np.random.randn(N, n2)  # channel out signal with AWGN (Nxn2) matrix
+    for j in range(N):
+        # Repetition (3,1)
+        # Soft Decision Decoding
+        decoded_w3 = np.sign(np.sum(yIII[j, :])).astype(int)
+        decoded_w3 = np.array([decoded_w3])
+        decoded_w3[decoded_w3 == -1] = 0
+        cw3 = coded_w3[j, :]
+        cw3[cw3 == -1] = 0  # revert modulation
+        ber_3sdd[i] += np.sum(decoded_w3 != cw3[0]) / n2
+
+# Final average BER for repetition code (3,1) with Soft Decision Decoding
+ber_3sdd /= N
+
+# BER vector for repetition code (5,1) with Soft Decision Decoding
+ber_5sdd = np.zeros(len(EbN0))
+
+for i in range(len(EbN0)):
+    yIV = (np.sqrt(EbN0[i]) * coded_w5) + np.random.randn(N, n3)  # channel out signal with AWGN (Nxn3) matrix
+    for j in range(N):
+        # Repetition (5,1)
+        decoded_w5 = np.sign(np.sum(yIV[j, :])).astype(int)
+        decoded_w5 = np.array([decoded_w5])
+        decoded_w5[decoded_w5 == -1] = 0
+        decoded_w5[decoded_w5 == -1] = 0
+        cw5 = coded_w5[j, :]
+        cw5[cw5 == -1] = 0  # revert modulation
+        ber_5sdd[i] += np.sum(decoded_w5 != cw5[0]) / n3
+
+# Final average BER for repetition code (5,1) with Soft Decision Decoding
+ber_5sdd /= N
+
+plt.figure(4)
 plt.semilogy(EbN0dB, ber_noCoding, "b--", label="No coding")
 plt.semilogy(EbN0dB, ber_7sdd, "r-s", label="Hamming7-SDD")
 plt.semilogy(EbN0dB, ber_7hdd, "k-s", label="Hamming7-HDD")
+#plt.semilogy(EbN0dB, ber_3hdd, "g-o", label="Repetition3-HDD")
+plt.semilogy(EbN0dB, ber_3sdd, "g-^", label="Repetition3-SDD")
+#plt.semilogy(EbN0dB, ber_5hdd, "m-o", label="Repetition5-HDD")
+plt.semilogy(EbN0dB, ber_5sdd, "m-^", label="Repetition5-SDD")
 plt.grid(True)
-plt.title("BER for no coding and (7,4) Hamming Code")
+plt.title("BER for no coding, (7,4) Hamming Code, (3,1) and (5,1) Repetition Codes")
 plt.ylabel("BER")
 plt.xlabel("Eb/N0(dB)")
 plt.legend()
